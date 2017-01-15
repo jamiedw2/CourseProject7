@@ -1,0 +1,72 @@
+---
+title: "Effect of Automatic or Manual Transmission on MPG"
+author: "James Whitehead"
+date: "15 January 2017"
+output: pdf_document
+---
+
+#Synopsis
+
+
+#Exploratory Data Analysis
+
+First of all load the data and any packages needed
+```{r}
+data(mtcars); library(ggplot2); library(GGally)
+```
+
+Figure 1 in the appendix shows a box-plot comparing the mpg for the two transmission types. This appears to show that manual transmission provides the higher mpg, but this may be affected by other variables, and these require further investigation. Figure 2 shows the pairs plot for all the variables in the mtcars dataset. This shows that mpg is also affected by a number of other variables that need to be considered.
+
+#Linear Regression
+
+Firstly, a simple linear regression between mpg and am (transmission type):
+
+```{r}
+fit1 <- lm(mpg ~ am, mtcars)
+summary(fit1)$coefficients
+```
+
+The intercept of 17.15 is the mean mpg for automatic transmission, while the slope of 7.24 is how much more mpg is achieved by manual by comparison. If we apply a linear regression using all the variables:
+
+```{r}
+fit <- lm(mpg ~ ., mtcars)
+summary(fit)$coefficients
+```
+
+our slope is reduced to a factor of 2.52 increase in mpg for manual compared to automatic. So some of the other variables account for the difference in mpg. However adding variables into the model increases the standard errors in the regression variables, so we don't want to include unnecessary variables. Looking back at figure 2, the upper part shows the correlations between all of the variable, with the top row showing correlation to mpg. Using the variables with the highest correlations and adding them into our model in turn, we can perform ANOVA on the models:
+
+```{r}
+fit2 <- lm(mpg ~ am+wt, mtcars)
+fit3 <- lm(mpg ~ am+wt+cyl, mtcars)
+fit4 <- lm(mpg ~ am+wt+cyl+disp, mtcars)
+fit5 <- lm(mpg ~ am+wt+cyl+disp+hp, mtcars)
+anova(fit1, fit2, fit3, fit4, fit5)
+```
+
+The p-value in the last column shows that including the vehicle weight (wt) and number of cylinders (cyl) into the model is necessary, however adding any more variables is not (and furthermore is undesirable due to variance inflation). Using fit3 as our model:
+
+```{r}
+summary(fit3)$coefficients
+```
+
+The result shows that the difference between manual and automatic transmission, in terms of fuel efficiency, is not statistically significant (p=0.89), and we fail to reject the null hypothesis that there is no difference in mpg between the two transmission types. The apparent difference seen in figure 1 is due to the influence of other variables, namely the vehicle weight and number of cylinders.
+
+Finally, the diagnostics plots in figure 3 show there is no pattern in the residuals and the errors are approximately normal.
+
+#Appendix: Figures
+
+```{r}
+f1 <- ggplot(mtcars, aes(factor(am), mpg)) +
+        geom_boxplot(fill="red") +
+        theme_classic() +
+        xlab("Transmission: 0 = Automatic; 1 = Manual") +
+        ggtitle("Fig. 1: Boxplot of MPG as a function of Transmission Type")
+f1
+
+f2 <- ggpairs(mtcars, lower=list(continuous="smooth"),
+              title="Fig. 2: Pair plot comapring all the variables in mtcars")
+f2
+
+par(mfrow=c(2,2))
+plot(fit3)
+```
