@@ -1,5 +1,5 @@
 ---
-title: "Effect of Automatic or Manual Transmission on MPG"
+title: "Effect of Automatic or Manual Transmission on Fuel Efficiency"
 author: "James Whitehead"
 date: "15 January 2017"
 output: pdf_document
@@ -7,11 +7,11 @@ output: pdf_document
 
 #Synopsis
 
+This report examines the relationship between a car's fuel efficiency (mpg) and whether it has manual or automatic transmission (am). We use the mtcars data available in R, and investigate the regression,also taking other variables into account. Taken on its own, there is a significant relationship between mpg and am, however this become insignificant when taking other variable into account in a multivariate regression.
 
 #Exploratory Data Analysis
 
-First of all load the data and any packages needed
-```{r}
+```{r echo=FALSE}
 data(mtcars); library(ggplot2); library(GGally)
 ```
 
@@ -33,7 +33,7 @@ fit <- lm(mpg ~ ., mtcars)
 summary(fit)$coefficients
 ```
 
-our slope is reduced to a factor of 2.52 increase in mpg for manual compared to automatic. So some of the other variables account for the difference in mpg. However adding variables into the model increases the standard errors in the regression variables, so we don't want to include unnecessary variables. Looking back at figure 2, the upper part shows the correlations between all of the variable, with the top row showing correlation to mpg. Using the variables with the highest correlations and adding them into our model in turn, we can perform ANOVA on the models:
+our slope is reduced to a factor of 2.52 increase in mpg for manual compared to automatic, so some of the other variables account for the difference in mpg. However adding variables into the model increases the standard errors in the regression variables, so we don't want to include unnecessary variables. Looking back at figure 2, the upper part shows the correlations between all of the variable, with the top row showing correlation to mpg. Using the variables with the highest correlations and adding them into our model in turn, we can perform ANOVA on the models:
 
 ```{r}
 fit2 <- lm(mpg ~ am+wt, mtcars)
